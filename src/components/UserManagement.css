@@ -1,0 +1,92 @@
+
+
+/* Main container styling */
+.user-management-container {
+    padding: 20px;
+    background: linear-gradient(135deg, #ff914d, #ff6300);
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+
+/* Header styling */
+.user-management-header {
+    font-size: 32px;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Table styling */
+.user-management-table {
+    width: 90%;
+    max-width: 1200px;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Table header styling */
+.user-management-table th {
+    background-color: #ff6300;
+    color: #ffffff;
+    padding: 12px;
+    text-align: left;
+    font-size: 16px;
+}
+
+/* Table row styling */
+.user-management-table td {
+    padding: 10px;
+    font-size: 14px;
+    color: #333333;
+    border-bottom: 1px solid #dddddd;
+}
+
+/* Zebra striping for rows */
+.user-management-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.user-management-table tr:hover {
+    background-color: #ffedd5;
+}
+
+/* Block button styling */
+.block-button {
+    background-color: #000000;
+    color: #ffffff;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.block-button:hover {
+    background-color: #ffc3ac;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .user-management-header {
+        font-size: 24px;
+    }
+
+    .user-management-table th, .user-management-table td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .block-button {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+}

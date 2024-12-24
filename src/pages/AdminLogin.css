@@ -1,0 +1,94 @@
+/* General container styling */
+.admin-login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ff914d, #ff6300);
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+}
+
+/* Form container */
+.admin-login-form {
+    background-color: #ffffff;
+    padding: 40px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Heading styling */
+.admin-login-form h2 {
+    font-size: 28px;
+    color: #333333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Label styling */
+.admin-login-label {
+    display: block;
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+/* Input field styling */
+.admin-login-form input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.admin-login-form input:focus {
+    outline: none;
+    border-color: #ff6300;
+    box-shadow: 0 0 5px rgba(255, 99, 0, 0.5);
+}
+
+/* Button styling */
+.admin-login-button {
+    width: 100%;
+    padding: 12px 0;
+    background-color: #ff6300;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.admin-login-button:hover {
+    background-color: #ff4500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-login-form {
+        padding: 30px 20px;
+    }
+
+    .admin-login-form h2 {
+        font-size: 24px;
+    }
+
+    .admin-login-form input {
+        font-size: 12px;
+    }
+
+    .admin-login-button {
+        font-size: 14px;
+    }
+}
+
+

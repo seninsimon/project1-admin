@@ -1,0 +1,71 @@
+/* Orders Container */
+.orders-container {
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+    background-color: #f4f5f7;
+    min-height: 100vh;
+  }
+  
+  /* Title */
+  .orders-title {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  /* Table Container */
+  .orders-table-container {
+    overflow-x: auto;
+    margin: 0 auto;
+    max-width: 90%;
+  }
+  
+  /* Orders Table */
+  .orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .orders-table th,
+  .orders-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-size: 1rem;
+  }
+  
+  .orders-table th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .orders-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .orders-table .status {
+    font-weight: bold;
+    text-transform: capitalize;
+  }
+  
+  /* Status Colors */
+  .status.pending {
+    color: #ffa500;
+  }
+  
+  .status.completed {
+    color: #4CAF50;
+  }
+  
+  .status.shipped {
+    color: #007bff;
+  }
+  
+  .status.cancelled {
+    color: #ff4d4f;
+  }
+  

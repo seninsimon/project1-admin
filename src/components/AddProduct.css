@@ -1,0 +1,214 @@
+.add-product-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.add-product-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.add-product-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.input-field, .textarea-field, .select-field, .file-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s;
+}
+
+.input-field:hover, .textarea-field:hover, .select-field:hover, .file-input:hover {
+    border-color: #ff9800;
+}
+
+.textarea-field {
+    resize: none;
+    height: 100px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.primary-btn, .secondary-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.primary-btn {
+    background-color: #ff9800;
+    color: #fff;
+}
+
+.primary-btn:hover {
+    background-color: #e68900;
+}
+
+.secondary-btn {
+    background-color: #ccc;
+    color: #333;
+}
+
+.secondary-btn:hover {
+    background-color: #bbb;
+}
+
+.image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px; /* Adds space below image previews */
+}
+
+.image-item {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+}
+
+.image-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.delete-image-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 50%;
+}
+
+.cropper-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.cropper-modal-content {
+    width: 90%;
+    max-width: 600px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+
+.cropper-modal-header {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: #333;
+    font-weight: bold;
+}
+
+.cropper-modal-body {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cropper-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.cropper-buttons .primary-btn {
+    padding: 10px 15px;
+    font-size: 1rem;
+}
+
+.cropper-buttons .secondary-btn {
+    padding: 10px 15px;
+    font-size: 1rem;
+}
+
+
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.delete-button:hover {
+    transform: scale(1.2);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
