@@ -1,7 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import './Category.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { categoryAddThunk, categoryDeleteThunk, categoryEditThunk, fetchCategoryThunk } from '../features/categorySlice';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const Category = () => {
     const [editMode, setEditMode] = useState(false);
@@ -9,43 +12,59 @@ const Category = () => {
     const [editId, setEditId] = useState('');
     const [cateName, setCategoryName] = useState('');
 
-    const toggleEditMode = (id) => {
-        setEditMode(!editMode);
-        setEditId(id);
-    };
-
     const { category } = useSelector((state) => state.category);
     const dispatch = useDispatch();
+
+    const categoriesPerPage = 10;  // Number of categories per page
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         dispatch(fetchCategoryThunk());
     }, [dispatch]);
 
+    // Handle Add Category
     const handleAddCategory = () => {
-        if (categoryData.trim() !== '') {
-            dispatch(categoryAddThunk(categoryData))
-                .then(() => {
-                    setCategoryData('');
-                    dispatch(fetchCategoryThunk());
-                })
-                .catch((error) => {
-                    console.error('Failed to add category:', error);
-                });
-        }
-    };
+        const lowerCaseCategory = categoryData.trim().toLowerCase();
 
-    const handleEdit = () => {
-        setEditMode(!editMode);
-        dispatch(categoryEditThunk({ editId, cateName }))
-            .unwrap()
+        if (!lowerCaseCategory) return;
+        if (category.some((cat) => cat.categoryName === lowerCaseCategory)) {
+            toast.error("Category already exists");
+            return;
+        }
+
+        dispatch(categoryAddThunk(lowerCaseCategory))
             .then(() => {
+                setCategoryData('');
                 dispatch(fetchCategoryThunk());
             })
             .catch((error) => {
-                console.log(error);
+                console.error('Failed to add category:', error);
             });
     };
 
+    // Handle Edit Category
+    const handleEdit = () => {
+        const lowerCaseCategory = cateName.trim().toLowerCase();
+
+        if (!lowerCaseCategory) return;
+        if (category.some((cat) => cat.categoryName === lowerCaseCategory && cat._id !== editId)) {
+            toast.error("Category already exists");
+            return;
+        }
+
+        dispatch(categoryEditThunk({ editId, cateName: lowerCaseCategory }))
+            .unwrap()
+            .then(() => {
+                setEditMode(false);
+                setCategoryName('');
+                dispatch(fetchCategoryThunk());
+            })
+            .catch((error) => {
+                console.error('Failed to edit category:', error);
+            });
+    };
+
+    // Handle Delete Category
     const handleDelete = (id) => {
         dispatch(categoryDeleteThunk(id))
             .unwrap()
@@ -53,6 +72,40 @@ const Category = () => {
                 dispatch(fetchCategoryThunk());
             });
     };
+
+    // Toggle Edit Mode
+    const toggleEditMode = (id) => {
+        setEditMode(true);
+        setEditId(id);
+        const selectedCategory = category.find((cat) => cat._id === id);
+        if (selectedCategory) {
+            setCategoryName(selectedCategory.categoryName);
+        }
+    };
+
+    // Calculate which categories to display based on the current page
+    const indexOfLastCategory = currentPage * categoriesPerPage;
+    const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage;
+    const currentCategories = category.slice(indexOfFirstCategory, indexOfLastCategory);
+
+    // Change page
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    // Total Pages Calculation
+    const totalPages = Math.ceil(category.length / categoriesPerPage);
+
+
+    const navigate = useNavigate()
+
+
+    const handleAddOffer = (categoryid) => {
+
+        navigate(`/categoryoffer/${categoryid}`)
+
+    }
+
+
+
 
     return (
         <div className="category-management">
@@ -63,12 +116,13 @@ const Category = () => {
                     <tr>
                         <th>Name</th>
                         <th>Status</th>
+
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {category.length > 0 ? (
-                        category.map((cat) => (
+                    {currentCategories.length > 0 ? (
+                        currentCategories.map((cat) => (
                             <tr key={cat._id}>
                                 <td>{cat.categoryName}</td>
                                 <td>
@@ -77,6 +131,12 @@ const Category = () => {
                                     </button>
                                 </td>
                                 <td>
+                                    <button className='border p-1 bg-green-400 rounded-lg'
+                                        onClick={() => handleAddOffer(cat._id)}
+                                    >
+
+                                        Add Offer
+                                    </button>
                                     <button className="action-btn edit" onClick={() => toggleEditMode(cat._id)}>
                                         Edit
                                     </button>
@@ -94,6 +154,37 @@ const Category = () => {
                 </tbody>
             </table>
 
+            <div className="pagination flex items-center justify-center space-x-4 mt-4">
+                <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="pagination-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:bg-gray-400"
+                >
+                    Previous
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex space-x-2">
+                    {[...Array(totalPages)].map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => paginate(index + 1)}
+                            className={`pagination-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : ''}`}
+                        >
+                            {index + 1}
+                        </button>
+                    ))}
+                </div>
+
+                <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="pagination-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:bg-gray-400"
+                >
+                    Next
+                </button>
+            </div>
+
             <div className="add-category">
                 <input
                     type="text"
@@ -101,7 +192,7 @@ const Category = () => {
                     className="add-input"
                     name="categoryName"
                     value={categoryData}
-                    onChange={(e) => setCategoryData(e.target.value)}
+                    onChange={(e) => setCategoryData(e.target.value.toLowerCase())}
                 />
                 <button className="add-btn" onClick={handleAddCategory}>
                     Add Category
@@ -116,21 +207,25 @@ const Category = () => {
                             type="text"
                             placeholder="Enter category name"
                             className="edit-input"
-                            onChange={(e) => setCategoryName(e.target.value)}
+                            value={cateName}
+                            onChange={(e) => setCategoryName(e.target.value.toLowerCase())}
                         />
                         <div className="modal-actions">
                             <button className="save-btn" onClick={handleEdit}>
                                 Save
                             </button>
-                            <button className="cancel-btn" onClick={toggleEditMode}>
+                            <button className="cancel-btn" onClick={() => setEditMode(false)}>
                                 Cancel
                             </button>
                         </div>
                     </div>
                 </div>
+
+
             )}
         </div>
     );
 };
 
 export default Category;
+

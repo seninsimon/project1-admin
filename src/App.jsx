@@ -12,6 +12,12 @@ import AddProduct from './components/AddProduct';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EditProduct from './components/EditProduct';
+import ReturnProducts from './components/ReturnProducts';
+import CategoryOffer from './components/CategoryOffer';
+import OfferDetails from './components/OfferDetails';
+import Coupon from './components/Coupon';
+import CouponDetails from './components/CouponDetails';
+
 
 function App() {
 
@@ -19,10 +25,10 @@ function App() {
   return (
     <>
 
-<ToastContainer />
+      <ToastContainer />
 
-    
-      <Routes>  
+
+      <Routes>
 
         <Route path='/adminlogin' element={<AdminLogin />} />
 
@@ -43,6 +49,12 @@ function App() {
           <Route path='category' element={<Category />} />
           <Route path='addproduct' element={<AddProduct />} />
           <Route path='editproduct/:id' element={<EditProduct />} />
+          <Route path='returnproducts' element={<ReturnProducts />} />
+          <Route path='categoryoffer/:id' element={<CategoryOffer />} />
+          <Route path='offerdetails' element={<OfferDetails />} />
+          <Route path='couponmanagement' element={<Coupon />} />
+          <Route path='coupondetails' element={<CouponDetails />} />
+
 
         </Route>
 

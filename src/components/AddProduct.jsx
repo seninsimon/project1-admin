@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import Cropper from 'react-cropper';
@@ -8,13 +10,9 @@ import './AddProduct.css';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-
-
-
 const AddProduct = () => {
-
-
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [productData, setProductData] = useState({
         productName: '',
@@ -30,9 +28,9 @@ const AddProduct = () => {
     const [images, setImages] = useState([]);
     const [category, setCategory] = useState([]);
     const [imageToCrop, setImageToCrop] = useState(null); // Image for cropping
-    const cropperRef = useRef(null); 
+    const cropperRef = useRef(null);
 
-    const dispatch = useDispatch();
+    const [errors, setErrors] = useState({});
 
     // Fetch categories on component mount
     useEffect(() => {
@@ -45,7 +43,7 @@ const AddProduct = () => {
             }
         };
         fetchCategory();
-    }, []); 
+    }, []);
 
     // Handle form data input changes
     const handleChange = (e) => {
@@ -86,24 +84,55 @@ const AddProduct = () => {
         inputElement.files = dataTransfer.files;
     };
 
+    // Validation function
+    const validateForm = () => {
+        const errors = {};
+
+        // Required fields
+        if (!productData.productName) errors.productName = 'Product Name is required';
+        if (!productData.sku) errors.sku = 'SKU is required';
+        if (!productData.modelName) errors.modelName = 'Model Name is required';
+        if (!productData.price) errors.price = 'Price is required';
+        if (productData.price <= 0) errors.price = 'Price must be a positive number';
+        if (!productData.quantity) errors.quantity = 'Quantity is required';
+        if (productData.quantity <= 0) errors.quantity = 'Quantity must be a positive number';
+        if (!productData.description) errors.description = 'Description is required';
+        if (!productData.brand) errors.brand = 'Brand Name is required';
+        if (!productData.categoryName) errors.categoryName = 'Category is required';
+        if (images.length === 0) errors.images = 'At least one image is required';
+
+        setErrors(errors);
+
+        // Return true if no errors
+        return Object.keys(errors).length === 0;
+    };
+
     // Handle adding the product
     const handleAddProduct = (e) => {
         e.preventDefault();
-        dispatch(addProductThunk({ productData, images })).unwrap()
-        .then(()=>
-        {
-            navigate('/products')
-            toast.success('Product added successfully!', {
-                position: 'top-center',
-                autoClose: 3000, // Close after 3 seconds
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
-        })
         
+        // Validate form before submission
+        if (!validateForm()) return;
+
+        dispatch(addProductThunk({ productData, images })).unwrap()
+            .then(() => {
+                navigate('/products');
+                toast.success('Product added successfully!', {
+                    position: 'top-center',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+            })
+            .catch((error) => {
+                toast.error('Failed to add product.', {
+                    position: 'top-center',
+                    autoClose: 3000,
+                });
+            });
     };
 
     return (
@@ -119,6 +148,8 @@ const AddProduct = () => {
                     className="input-field"
                     value={productData.productName}
                 />
+                {errors.productName && <div className="error text-red-600">{errors.productName}</div>}
+
                 <input
                     type="text"
                     name="sku"
@@ -127,6 +158,8 @@ const AddProduct = () => {
                     className="input-field"
                     value={productData.sku}
                 />
+                {errors.sku && <div className="error text-red-600">{errors.sku}</div>}
+
                 <input
                     type="text"
                     name="modelName"
@@ -135,6 +168,8 @@ const AddProduct = () => {
                     className="input-field"
                     value={productData.modelName}
                 />
+                {errors.modelName && <div className="error text-red-600">{errors.modelName}</div>}
+
                 <input
                     type="number"
                     name="price"
@@ -143,6 +178,8 @@ const AddProduct = () => {
                     className="input-field"
                     value={productData.price}
                 />
+                {errors.price && <div className="error text-red-600">{errors.price}</div>}
+
                 <input
                     type="number"
                     name="quantity"
@@ -151,6 +188,8 @@ const AddProduct = () => {
                     className="input-field"
                     value={productData.quantity}
                 />
+                {errors.quantity && <div className="error text-red-600">{errors.quantity}</div>}
+
                 <textarea
                     name="description"
                     placeholder="Description"
@@ -158,6 +197,8 @@ const AddProduct = () => {
                     className="textarea-field"
                     value={productData.description}
                 ></textarea>
+                {errors.description && <div className="error text-red-600">{errors.description}</div>}
+
                 <input
                     type="text"
                     name="brand"
@@ -166,6 +207,8 @@ const AddProduct = () => {
                     className="input-field"
                     value={productData.brand}
                 />
+                {errors.brand && <div className="error text-red-600">{errors.brand}</div>}
+
                 <input
                     type="file"
                     name="imageUrl"
@@ -174,6 +217,7 @@ const AddProduct = () => {
                     onChange={handleImage}
                     className="file-input"
                 />
+                {errors.images && <div className="error text-red-600  ">{errors.images}</div>}
 
                 {/* Cropping Modal */}
                 {imageToCrop && (
@@ -184,13 +228,10 @@ const AddProduct = () => {
                                 <Cropper
                                     src={imageToCrop}
                                     style={{ height: 400, width: '100%' }}
-                                    aspectRatio={1} // Adjust aspect ratio as needed
+                                    aspectRatio={1}
                                     guides={true}
                                     ref={cropperRef}
                                 />
-                                <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#666' }}>
-                                    Drag to adjust the crop area. Click "Crop & Save" when you're done.
-                                </p>
                             </div>
                             <div className="cropper-buttons">
                                 <button type="button" onClick={handleCrop} className="primary-btn">
@@ -207,8 +248,6 @@ const AddProduct = () => {
                         </div>
                     </div>
                 )}
-
-
 
                 {/* Image Preview Section */}
                 {images.length > 0 && (
@@ -245,6 +284,8 @@ const AddProduct = () => {
                         </option>
                     ))}
                 </select>
+                {errors.categoryName && <div className="error text-red-600">{errors.categoryName}</div>}
+
                 <div className="button-group">
                     <button type="submit" onClick={handleAddProduct} className="primary-btn">
                         Add Product
@@ -259,3 +300,4 @@ const AddProduct = () => {
 };
 
 export default AddProduct;
+

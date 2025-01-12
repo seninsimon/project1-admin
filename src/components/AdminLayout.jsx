@@ -42,6 +42,20 @@ const AdminLayout = () => {
             <li className="admin-nav-item">
               <Link to="/usermanagement" className="admin-nav-link">User Management</Link>
             </li>
+            <li className="admin-nav-item">
+              <Link to="/returnproducts" className="admin-nav-link">Return Products</Link>
+            </li>
+            <li className="admin-nav-item">
+              <Link to="/offerdetails" className="admin-nav-link">Offer Details</Link>
+            </li>
+            <li className="admin-nav-item">
+              <Link to="/couponmanagement" className="admin-nav-link">Coupon Management</Link>
+            </li>
+            <li className="admin-nav-item">
+              <Link to="/coupondetails" className="admin-nav-link">Coupon Details</Link>
+            </li>
+
+            
             <button
               onClick={handleLogout}
               className="px-4 py-2 mt-4 bg-red-500 text-white font-semibold rounded-md shadow-md hover:bg-red-600 transition-all duration-300"
