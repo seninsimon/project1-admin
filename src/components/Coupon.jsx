@@ -14,8 +14,12 @@ const Coupon = () => {
       toast.error('Coupon code is required');
       return;
     }
-    if (!discount || discount <= 0 || discount > 50) {
-      toast.error('Discount must be between 1 and 50%');
+    if (!discount || discount <= 0) {
+      toast.error('Discount must be a positive amount');
+      return;
+    }
+    if (discount > 500) {
+      toast.error('Discount cannot be greater than ₹500');
       return;
     }
     if (!expiryDate || new Date(expiryDate) < new Date()) {
@@ -53,19 +57,13 @@ const Coupon = () => {
         />
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Discount (%)</label>
+        <label className="block text-sm font-medium mb-1">Discount Amount</label>
         <input
           type="number"
           value={discount}
           onChange={(e) => setDiscount(e.target.value)}
           className="w-full border rounded p-2"
-          placeholder="Enter discount percentage (Max: 50%)"
-          onBlur={() => {
-            if (discount > 50) {
-              toast.error('Discount cannot exceed 50%');
-              setDiscount(50);
-            }
-          }}
+          placeholder="Enter discount amount"
         />
       </div>
       <div className="mb-4">
@@ -89,4 +87,3 @@ const Coupon = () => {
 };
 
 export default Coupon;
-    

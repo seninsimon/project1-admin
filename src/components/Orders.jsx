@@ -120,7 +120,8 @@ const Orders = () => {
                 key={order._id}
                 className="border-b hover:bg-gray-50 transition duration-200 cursor-pointer"
               >
-                <td className="py-3 px-6 text-left">{order._id}</td>
+                <td className="py-3 px-6 text-left">{order._id.slice(-5)}</td>
+
                 <td className="py-3 px-6 text-left">
                   {order.userId?.username || 'Guest'}
                 </td>
@@ -137,23 +138,21 @@ const Orders = () => {
                   {order.products.map((product) => (
                     <div key={product.productId._id} className="truncate">
                       {product.productId.productName}
+                      (x{product.quantity})
                     </div>
                   ))}
                 </td>
                 <td className="py-3 px-6 text-right">
                   ₹
-                  {order.totalPrice > 5000
-                    ? `${(order.totalPrice * 0.9).toFixed(2)}`
-                    : order.totalPrice}
+                  {order.totalPrice}
                 </td>
                 <td className="py-3 px-6 text-center">{order.status}</td>
                 <td className="py-3 px-6 text-center">
                   <select
                     value={order.status}
-                    onChange={(e) =>
-                      handleStatusChange(order._id, e.target.value)
-                    }
+                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
                     className="border border-gray-300 rounded px-2 py-1 bg-white"
+                    disabled={order.status === "Cancelled"} // Disable if the status is Cancelled
                   >
                     <option value="Pending">Pending</option>
                     <option value="Confirmed">Confirmed</option>
@@ -161,6 +160,7 @@ const Orders = () => {
                     <option value="Delivered">Delivered</option>
                     <option value="Cancelled">Cancelled</option>
                   </select>
+
                 </td>
               </tr>
             ))}

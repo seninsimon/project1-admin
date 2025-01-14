@@ -41,7 +41,7 @@ const CouponDetails = () => {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Code</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Discount (%)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Discount Amount</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Expiry Date</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Status</th>
               <th className="px-4 py-2 text-center text-sm font-medium text-gray-600">Actions</th>
@@ -51,7 +51,7 @@ const CouponDetails = () => {
             {coupons.map((coupon) => (
               <tr key={coupon._id} className="border-b">
                 <td className="px-4 py-2 text-sm text-gray-700">{coupon.code}</td>
-                <td className="px-4 py-2 text-sm text-gray-700">{coupon.discount}%</td>
+                <td className="px-4 py-2 text-sm text-gray-700">{coupon.discount}</td>
                 <td className="px-4 py-2 text-sm text-gray-700">
                   {new Date(coupon.expiryDate).toLocaleDateString()}
                 </td>
