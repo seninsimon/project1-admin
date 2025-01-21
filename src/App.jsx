@@ -17,6 +17,9 @@ import CategoryOffer from './components/CategoryOffer';
 import OfferDetails from './components/OfferDetails';
 import Coupon from './components/Coupon';
 import CouponDetails from './components/CouponDetails';
+import ProductOffer from './components/ProductOffer';
+import ProductOfferDetails from './components/ProductOfferDetails';
+import TopAnalyticsPage from './components/TopAnalyticsPage';
 
 
 function App() {
@@ -54,6 +57,9 @@ function App() {
           <Route path='offerdetails' element={<OfferDetails />} />
           <Route path='couponmanagement' element={<Coupon />} />
           <Route path='coupondetails' element={<CouponDetails />} />
+          <Route path='productoffer/:id' element={<ProductOffer />} />
+          <Route path='productofferdetails' element={<ProductOfferDetails />} />
+          <Route path='topanalyticspage' element={<TopAnalyticsPage />} />
 
 
         </Route>

@@ -46,7 +46,7 @@ const AdminLayout = () => {
               <Link to="/returnproducts" className="admin-nav-link">Return Products</Link>
             </li>
             <li className="admin-nav-item">
-              <Link to="/offerdetails" className="admin-nav-link">Offer Details</Link>
+              <Link to="/offerdetails" className="admin-nav-link">Category Offer Details</Link>
             </li>
             <li className="admin-nav-item">
               <Link to="/couponmanagement" className="admin-nav-link">Coupon Management</Link>
@@ -54,6 +54,13 @@ const AdminLayout = () => {
             <li className="admin-nav-item">
               <Link to="/coupondetails" className="admin-nav-link">Coupon Details</Link>
             </li>
+            <li className="admin-nav-item">
+              <Link to="/productofferdetails" className="admin-nav-link">Product Offer Details</Link>
+            </li>
+            <li className="admin-nav-item">
+              <Link to="/topanalyticspage" className="admin-nav-link">Top Analytics</Link>
+            </li>
+           
 
             
             <button
