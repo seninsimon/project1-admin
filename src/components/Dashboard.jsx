@@ -16,9 +16,9 @@ const Dashboard = () => {
   const [totalSalesData, setTotalSalesData] = useState(null);
   const [totalDiscountsData, setTotalDiscountsData] = useState(null);
   const [orderAmountData, setOrderAmountData] = useState(null);
-  const [dateRange, setDateRange] = useState('daily'); // Default to daily
-  const [startDate, setStartDate] = useState(today); // Default start date
-  const [endDate, setEndDate] = useState(tomorrow); // Default end date
+  const [dateRange, setDateRange] = useState('daily'); 
+  const [startDate, setStartDate] = useState(today); 
+  const [endDate, setEndDate] = useState(tomorrow); 
 
   useEffect(() => {
     fetchSalesData();
@@ -85,76 +85,83 @@ const Dashboard = () => {
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text('Sales Report Overview', 20, 20);
-
-    const ranges = ['daily', 'weekly', 'yearly'];
-    const reports = [];
-
+  
     try {
-      for (const range of ranges) {
-        const { startDate, endDate } = getDateRange(range);
-        const params = { dateRange: range };
-
-        const salesResponse = await axiosClient.post('/totalsales', params);
-        const discountsResponse = await axiosClient.post('/totaldiscounts', params);
-        const orderAmountResponse = await axiosClient.post('/orderamount', params);
-
-        reports.push({
-          range,
-          startDate,
-          endDate,
-          totalSales: salesResponse.data?.totalSales || 0,
-          totalDiscounts: discountsResponse.data?.totalDiscounts || 0,
-          totalOrderAmount: orderAmountResponse.data?.totalOrderAmount || 0,
-        });
-      }
-
-      reports.forEach((report, index) => {
-        const yOffset = 30 + index * 40;
-        doc.setFontSize(14);
-        doc.text(`${report.range.charAt(0).toUpperCase() + report.range.slice(1)}: ${report.startDate} to ${report.endDate}`, 20, yOffset);
-        doc.setFontSize(12);
-        doc.text(`Total Sales: ₹${report.totalSales.toFixed(2)}`, 20, yOffset + 10);
-        doc.text(`Total Discounts: ₹${report.totalDiscounts.toFixed(2)}`, 20, yOffset + 20);
-        doc.text(`Total Order Amount: ₹${report.totalOrderAmount.toFixed(2)}`, 20, yOffset + 30);
+      const { startDate, endDate } = getDateRange();
+      const params = dateRange === 'custom' ? { dateRange, startDate, endDate } : { dateRange };
+  
+      const salesResponse = await axiosClient.post('/totalsales', params);
+      const discountsResponse = await axiosClient.post('/totaldiscounts', params);
+      const orderAmountResponse = await axiosClient.post('/orderamount', params);
+  
+      const totalSales = salesResponse.data?.totalSales || 0;
+      const totalDiscounts = discountsResponse.data?.totalDiscounts || 0;
+      const discountPercentage = totalSales > 0 ? (totalDiscounts / totalSales) * 100 : 0;
+      const totalOrderAmount = orderAmountResponse.data?.totalOrderAmount || 0;
+  
+      // Add report header
+      doc.setFontSize(14);
+      doc.text(`Date Range: ${startDate} to ${endDate}`, 20, 40);
+  
+      // Add a professional table
+      const tableData = [
+        ['Metric', 'Amount (₹)'],
+        ['Total Sales', totalSales.toFixed(2)],
+        ['Total Discounts', totalDiscounts.toFixed(2)],
+        ['Discount Percentage (%)', discountPercentage.toFixed(2)],
+        ['Total Order Amount', totalOrderAmount.toFixed(2)],
+      ];
+  
+      tableData.forEach((row, index) => {
+        const yOffset = 50 + index * 10;
+        doc.text(`${row[0]}:`, 20, yOffset);
+        doc.text(row[1], 120, yOffset, { align: 'right' });
       });
-
-      doc.save('sales-report.pdf');
+  
+      // Save the PDF
+      doc.save(`sales-report-${dateRange}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     }
   };
+  
 
 
   const generateExcel = async () => {
-    const ranges = ['daily', 'weekly', 'yearly'];
-    const data = [['Sales Report'], ['Metric', 'Amount', 'Date Range']];
-
     try {
-      for (const range of ranges) {
-        const { startDate, endDate } = getDateRange(range);
-        const params = { dateRange: range };
-
-        const salesResponse = await axiosClient.post('/totalsales', params);
-        const discountsResponse = await axiosClient.post('/totaldiscounts', params);
-        const orderAmountResponse = await axiosClient.post('/orderamount', params);
-
-        data.push(
-          [`${range.charAt(0).toUpperCase() + range.slice(1)}: Total Sales`, salesResponse.data?.totalSales || 0, `${startDate} - ${endDate}`],
-          [`${range.charAt(0).toUpperCase() + range.slice(1)}: Total Discounts`, discountsResponse.data?.totalDiscounts || 0, `${startDate} - ${endDate}`],
-          [`${range.charAt(0).toUpperCase() + range.slice(1)}: Total Order Amount`, orderAmountResponse.data?.totalOrderAmount || 0, `${startDate} - ${endDate}`]
-        );
-      }
-
+      const { startDate, endDate } = getDateRange();
+      const params = dateRange === 'custom' ? { dateRange, startDate, endDate } : { dateRange };
+  
+      const salesResponse = await axiosClient.post('/totalsales', params);
+      const discountsResponse = await axiosClient.post('/totaldiscounts', params);
+      const orderAmountResponse = await axiosClient.post('/orderamount', params);
+  
+      const totalSales = salesResponse.data?.totalSales || 0;
+      const totalDiscounts = discountsResponse.data?.totalDiscounts || 0;
+      const discountPercentage = totalSales > 0 ? (totalDiscounts / totalSales) * 100 : 0;
+      const totalOrderAmount = orderAmountResponse.data?.totalOrderAmount || 0;
+  
+      // Prepare data for Excel
+      const data = [
+        ['Metric', 'Amount (₹)', 'Date Range'],
+        ['Total Sales', totalSales.toFixed(2), `${startDate} to ${endDate}`],
+        ['Total Discounts', totalDiscounts.toFixed(2), `${startDate} to ${endDate}`],
+        ['Discount Percentage (%)', discountPercentage.toFixed(2), `${startDate} to ${endDate}`],
+        ['Total Order Amount', totalOrderAmount.toFixed(2), `${startDate} to ${endDate}`],
+      ];
+  
+      // Convert data to Excel sheet
       const ws = XLSX.utils.aoa_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Sales Report');
-
+  
       const excelFile = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-      saveAs(new Blob([excelFile]), 'sales-report.xlsx');
+      saveAs(new Blob([excelFile]), `sales-report-${dateRange}.xlsx`);
     } catch (error) {
       console.error('Error generating Excel:', error);
     }
   };
+  
 
 
   const chartData = {
