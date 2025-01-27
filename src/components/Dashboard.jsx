@@ -1,277 +1,416 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import jsPDF from 'jspdf';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+import {
+    Card,
+    CardContent,
+    Grid,
+    Typography,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    TextField,
+    TablePagination
+} from '@mui/material';
+import { format, parseISO } from 'date-fns';
 
-// Registering chart.js components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+// Register ChartJS components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 const Dashboard = () => {
-  const today = new Date().toISOString().split('T')[0]; // Get today's date in 'YYYY-MM-DD' format
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]; // Get tomorrow's date
+    const [salesData, setSalesData] = useState(null);
+    const [filterType, setFilterType] = useState('today');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const [totalSalesData, setTotalSalesData] = useState(null);
-  const [totalDiscountsData, setTotalDiscountsData] = useState(null);
-  const [orderAmountData, setOrderAmountData] = useState(null);
-  const [dateRange, setDateRange] = useState('daily'); 
-  const [startDate, setStartDate] = useState(today); 
-  const [endDate, setEndDate] = useState(tomorrow); 
+    const fetchSalesReport = async () => {
+        try {
+            setLoading(true);
+            setError(null);
 
-  useEffect(() => {
-    fetchSalesData();
-  }, [dateRange, startDate, endDate]);
+            let params = { filterType };
+            if (filterType === 'custom' && startDate && endDate) {
+                params.startDate = startDate;
+                params.endDate = endDate;
+            }
 
-  const getDateRange = () => {
-    let start = '';
-    let end = '';
-    const today = new Date();
-    const year = today.getFullYear();
-    switch (dateRange) {
-      case 'daily':
-        start = today.toISOString().split('T')[0]; // Current date
-        end = start;
-        break;
-      case 'weekly':
-        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-        const endOfWeek = new Date(today.setDate(today.getDate() + 6));
-        start = startOfWeek.toISOString().split('T')[0];
-        end = endOfWeek.toISOString().split('T')[0];
-        break;
-      case 'yearly':
-        start = new Date(year, 0, 1).toISOString().split('T')[0]; // Start of the year
-        end = new Date(year, 11, 31).toISOString().split('T')[0]; // End of the year
-        break;
-      case 'custom':
-        start = startDate;
-        end = endDate;
-        break;
-      default:
-        break;
+            console.log('Fetching sales report with params:', params);
+            const response = await axiosClient.get('/admin/sales-report', { params });
+            console.log('Sales report response:', response.data);
+
+            if (response.data.success) {
+                setSalesData(response.data.data);
+            } else {
+                setError('Failed to fetch sales data');
+            }
+        } catch (error) {
+            console.error('Error fetching sales report:', error);
+            setError(error.response?.data?.message || 'Error fetching sales report');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSalesReport();
+    }, [filterType, startDate, endDate]);
+
+    const handleDownloadPDF = async () => {
+        try {
+            let params = { filterType };
+            if (filterType === 'custom' && startDate && endDate) {
+                params.startDate = startDate;
+                params.endDate = endDate;
+            }
+
+            const response = await axiosClient.get('/admin/download-sales-report-pdf', {
+                params,
+                responseType: 'blob'
+            });
+
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `sales-report-${new Date().toISOString().split('T')[0]}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
+        }
+    };
+
+    const handleDownloadExcel = async () => {
+        try {
+            let params = { filterType };
+            if (filterType === 'custom' && startDate && endDate) {
+                params.startDate = startDate;
+                params.endDate = endDate;
+            }
+
+            const response = await axiosClient.get('/admin/download-sales-report-excel', {
+                params,
+                responseType: 'blob'
+            });
+
+            const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `sales-report-${new Date().toISOString().split('T')[0]}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading Excel:', error);
+        }
+    };
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    };
+
+    const formatDate = (date) => {
+        return new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    if (loading) {
+        return (
+            <div className="p-4">
+                <Typography>Loading...</Typography>
+            </div>
+        );
     }
-    return { startDate: start, endDate: end };
-  };
 
-  const fetchSalesData = async () => {
-    try {
-      const { startDate, endDate } = getDateRange();
-      const params = dateRange === 'custom' ? { dateRange, startDate, endDate } : { dateRange };
-
-      const salesResponse = await axiosClient.post('/totalsales', params);
-      const totalSales = salesResponse.data?.totalSales || 0;
-      setTotalSalesData({ totalSales });
-
-      let totalDiscounts = 0;
-      let discountPercentage = 0;
-
-      if (totalSales > 0) {
-        const discountsResponse = await axiosClient.post('/totaldiscounts', params);
-        totalDiscounts = discountsResponse.data?.totalDiscounts || 0;
-        discountPercentage = (totalDiscounts / totalSales) * 100;
-      }
-
-      setTotalDiscountsData({ totalDiscounts, discountPercentage });
-
-      const orderAmountResponse = await axiosClient.post('/orderamount', params);
-      setOrderAmountData(orderAmountResponse.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    if (error) {
+        return (
+            <div className="p-4">
+                <Typography color="error">{error}</Typography>
+            </div>
+        );
     }
-  };
-    
-  const generatePDF = async () => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Sales Report Overview', 20, 20);
-  
-    try {
-      const { startDate, endDate } = getDateRange();
-      const params = dateRange === 'custom' ? { dateRange, startDate, endDate } : { dateRange };
-  
-      const salesResponse = await axiosClient.post('/totalsales', params);
-      const discountsResponse = await axiosClient.post('/totaldiscounts', params);
-      const orderAmountResponse = await axiosClient.post('/orderamount', params);
-  
-      const totalSales = salesResponse.data?.totalSales || 0;
-      const totalDiscounts = discountsResponse.data?.totalDiscounts || 0;
-      const discountPercentage = totalSales > 0 ? (totalDiscounts / totalSales) * 100 : 0;
-      const totalOrderAmount = orderAmountResponse.data?.totalOrderAmount || 0;
-  
-      // Add report header
-      doc.setFontSize(14);
-      doc.text(`Date Range: ${startDate} to ${endDate}`, 20, 40);
-  
-      // Add a professional table
-      const tableData = [
-        ['Metric', 'Amount (₹)'],
-        ['Total Sales', totalSales.toFixed(2)],
-        ['Total Discounts', totalDiscounts.toFixed(2)],
-        ['Discount Percentage (%)', discountPercentage.toFixed(2)],
-        ['Total Order Amount', totalOrderAmount.toFixed(2)],
-      ];
-  
-      tableData.forEach((row, index) => {
-        const yOffset = 50 + index * 10;
-        doc.text(`${row[0]}:`, 20, yOffset);
-        doc.text(row[1], 120, yOffset, { align: 'right' });
-      });
-  
-      // Save the PDF
-      doc.save(`sales-report-${dateRange}.pdf`);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-  };
-  
 
+    const chartOptions = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Daily Sales Trend',
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+            },
+        },
+    };
 
-  const generateExcel = async () => {
-    try {
-      const { startDate, endDate } = getDateRange();
-      const params = dateRange === 'custom' ? { dateRange, startDate, endDate } : { dateRange };
-  
-      const salesResponse = await axiosClient.post('/totalsales', params);
-      const discountsResponse = await axiosClient.post('/totaldiscounts', params);
-      const orderAmountResponse = await axiosClient.post('/orderamount', params);
-  
-      const totalSales = salesResponse.data?.totalSales || 0;
-      const totalDiscounts = discountsResponse.data?.totalDiscounts || 0;
-      const discountPercentage = totalSales > 0 ? (totalDiscounts / totalSales) * 100 : 0;
-      const totalOrderAmount = orderAmountResponse.data?.totalOrderAmount || 0;
-  
-      // Prepare data for Excel
-      const data = [
-        ['Metric', 'Amount (₹)', 'Date Range'],
-        ['Total Sales', totalSales.toFixed(2), `${startDate} to ${endDate}`],
-        ['Total Discounts', totalDiscounts.toFixed(2), `${startDate} to ${endDate}`],
-        ['Discount Percentage (%)', discountPercentage.toFixed(2), `${startDate} to ${endDate}`],
-        ['Total Order Amount', totalOrderAmount.toFixed(2), `${startDate} to ${endDate}`],
-      ];
-  
-      // Convert data to Excel sheet
-      const ws = XLSX.utils.aoa_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Sales Report');
-  
-      const excelFile = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-      saveAs(new Blob([excelFile]), `sales-report-${dateRange}.xlsx`);
-    } catch (error) {
-      console.error('Error generating Excel:', error);
-    }
-  };
-  
-
-
-  const chartData = {
-    labels: ['Total Sales', 'Total Discounts', 'Total Order Amount'],
-    datasets: [
-      {
-        label: 'Amount (₹)',
-        data: [
-          totalSalesData ? totalSalesData.totalSales : 0,
-          totalDiscountsData ? totalDiscountsData.totalDiscounts : 0,
-          orderAmountData ? orderAmountData.totalOrderAmount : 0,
+    const chartData = {
+        labels: salesData?.chartData?.map(item => format(parseISO(item._id), 'MMM dd')) || [],
+        datasets: [
+            {
+                label: 'Sales Amount',
+                data: salesData?.chartData?.map(item => item.totalSales) || [],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+            },
+            {
+                label: 'Order Count',
+                data: salesData?.chartData?.map(item => item.orderCount) || [],
+                borderColor: 'rgb(255, 99, 132)',
+                tension: 0.1,
+            },
         ],
-        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
-        borderColor: '#fff',
-        borderWidth: 2,
-      },
-    ],
-  };
+    };
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Sales Report Overview',
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
-  };
+    return (
+        <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+                <Typography variant="h4" gutterBottom>
+                    Sales Report Dashboard
+                </Typography>
 
-  return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-center mb-8">Sales Report</h1>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleDownloadPDF}
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    >
+                        Download PDF
+                    </button>
+                    <button
+                        onClick={handleDownloadExcel}
+                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    >
+                        Download Excel
+                    </button>
+                </div>
+            </div>
 
-      <div className="flex items-center justify-between mb-6">
-        <select
-          onChange={(e) => setDateRange(e.target.value)}
-          value={dateRange}
-          className="px-4 py-2 border rounded-md bg-white shadow-sm"
-        >
-          <option value="daily">today</option>
-          <option value="weekly">Weekly</option>
-          <option value="yearly">Yearly</option>
-          <option value="custom">Custom Date Range</option>
-        </select>
-        {dateRange === 'custom' && (
-          <div className="flex space-x-4">
-            <input
-              type="date"
-              onChange={(e) => setStartDate(e.target.value)}
-              value={startDate}
-              className="px-4 py-2 border rounded-md bg-white shadow-sm"
-            />
-            <input
-              type="date"
-              onChange={(e) => setEndDate(e.target.value)}
-              value={endDate}
-              className="px-4 py-2 border rounded-md bg-white shadow-sm"
-            />
-          </div>
-        )}
-      </div>
+            {/* Filters */}
+            <div className="mb-6 flex gap-4 items-center">
+                <Select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="min-w-[150px]"
+                >
+                    <MenuItem value="today">Today</MenuItem>
+                    <MenuItem value="weekly">This Week</MenuItem>
+                    <MenuItem value="monthly">This Month</MenuItem>
+                    <MenuItem value="custom">Custom Range</MenuItem>
+                </Select>
 
-    
-      
+                {filterType === 'custom' && (
+                    <div className="flex gap-4">
+                        <TextField
+                            type="date"
+                            label="Start Date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            InputLabelProps={{ shrink: true }}
+                        />
+                        <TextField
+                            type="date"
+                            label="End Date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            InputLabelProps={{ shrink: true }}
+                        />
+                    </div>
+                )}
+            </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold">Total Sales</h3>
-          <p className="text-2xl font-bold">{totalSalesData ? `₹${totalSalesData.totalSales}` : 'Loading...'}</p>
+            {/* Summary Cards */}
+            <Grid container spacing={3} className="mb-6">
+                <Grid item xs={12} sm={6} md={2}>
+                    <Paper className="p-4">
+                        <Typography variant="subtitle2" color="textSecondary">Total Orders</Typography>
+                        <Typography variant="h4">{salesData?.summary?.totalOrders || 0}</Typography>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                    <Paper className="p-4">
+                        <Typography variant="subtitle2" color="textSecondary">Total Sales</Typography>
+                        <Typography variant="h4">{formatCurrency(salesData?.summary?.totalSales || 0)}</Typography>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                    <Paper className="p-4">
+                        <Typography variant="subtitle2" color="textSecondary">Total Discounts</Typography>
+                        <Typography variant="h4">{formatCurrency(salesData?.summary?.totalDiscounts || 0)}</Typography>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                    <Paper className="p-4">
+                        <Typography variant="subtitle2" color="textSecondary">Average Order Value</Typography>
+                        <Typography variant="h4">{formatCurrency(salesData?.summary?.averageOrderValue || 0)}</Typography>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                    <Paper className="p-4">
+                        <Typography variant="subtitle2" color="textSecondary">Total Products Sold</Typography>
+                        <Typography variant="h4">{salesData?.summary?.totalProducts || 0}</Typography>
+                    </Paper>
+                </Grid>
+            </Grid>
+
+            {/* Detailed Sales Table */}
+            <Paper className="mb-6">
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Order Date</TableCell>
+                                <TableCell>Order ID</TableCell>
+                                <TableCell>Products</TableCell>
+                                <TableCell>Payment Method</TableCell>
+                                <TableCell align="right">Items</TableCell>
+                                <TableCell align="right">Subtotal</TableCell>
+                                <TableCell align="right">Discount</TableCell>
+                                <TableCell align="right">Total</TableCell>
+                                <TableCell align="right">Status</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {salesData?.orderDetails
+                                ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map((order) => (
+                                    <TableRow key={order.orderId} hover>
+                                        <TableCell>{formatDate(order.orderDate)}</TableCell>
+                                        <TableCell>{order.orderId.slice(-5)}</TableCell>
+                                        <TableCell>
+                                            <div className="max-h-20 overflow-y-auto">
+                                                {order.products.map((product, idx) => (
+                                                    <div key={idx} className="text-sm">
+                                                        {product.name} x {product.quantity}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{order.paymentMethod}</TableCell>
+                                        <TableCell align="right">
+                                            {order.products.reduce((sum, p) => sum + p.quantity, 0)}
+                                        </TableCell>
+                                        <TableCell align="right">{formatCurrency(order.subtotal)}</TableCell>
+                                        <TableCell align="right" className="text-red-500">
+                                            -{formatCurrency(order.discount)}
+                                        </TableCell>
+                                        <TableCell align="right">{formatCurrency(order.totalAmount)}</TableCell>
+                                        <TableCell align="right">
+                                            <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                                Delivered
+                                            </span>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[10, 25, 50]}
+                    component="div"
+                    count={salesData?.orderDetails?.length || 0}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            </Paper>
+
+            {/* Sales Chart */}
+            <Card className="mb-4">
+                <CardContent>
+                    <Line options={chartOptions} data={chartData} />
+                </CardContent>
+            </Card>
+
+            {/* Top Products Table */}
+            {salesData && (
+                <Card className="mb-4">
+                    <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                            Top Performing Products
+                        </Typography>
+                        <TableContainer component={Paper}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Product Name</TableCell>
+                                        <TableCell align="right">Quantity Sold</TableCell>
+                                        <TableCell align="right">Total Revenue</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {salesData.productPerformance.map((product) => (
+                                        <TableRow key={product._id}>
+                                            <TableCell>{product.productName}</TableCell>
+                                            <TableCell align="right">{product.totalQuantity}</TableCell>
+                                            <TableCell align="right">{formatCurrency(product.totalRevenue)}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </CardContent>
+                </Card>
+            )}
         </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold">Total Discounts</h3>
-          <p className="text-2xl font-bold">{totalDiscountsData ? `₹${totalSalesData.totalSales == 0 ?  0 : totalDiscountsData.totalDiscounts}` : 'Loading...'}</p>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold">Total Order Amount</h3>
-          <p className="text-2xl font-bold">{orderAmountData ? `₹${orderAmountData?.totalOrderAmount || 0}` : 'Loading...'}</p>
-        </div>
-      </div>
-
-      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-        <Bar data={chartData} options={chartOptions} />
-      </div>
-
-      <div className="flex space-x-4 justify-center">
-        <button
-          onClick={generatePDF}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none"
-        >
-          Download PDF
-        </button>
-        <button
-          onClick={generateExcel}
-          className="px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none"
-        >
-          Download Excel
-        </button>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Dashboard;
