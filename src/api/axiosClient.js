@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an Axios instance
 const axiosClient = axios.create({
-    baseURL: "http://localhost:3000", // Replace with your API base URL
+    baseURL: "https://api.seninsimon.site", // Replace with your API base URL
 });
 
 // Request Interceptor
