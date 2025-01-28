@@ -110,8 +110,9 @@ const Orders = () => {
               <th className="py-3 px-6 text-left">Delivered Address</th>
               <th className="py-3 px-6 text-left">Products</th>
               <th className="py-3 px-6 text-right">Total Price</th>
-              <th className="py-3 px-6 text-center">Status</th>
+              <th className="py-3 px-6 text-center">Status</th>     
               <th className="py-3 px-6 text-center">Actions</th>
+              <th className="py-3 px-6 text-center">Cancel Reason</th>
             </tr>
           </thead>
           <tbody className="text-gray-700 text-sm">
@@ -162,6 +163,7 @@ const Orders = () => {
                   </select>
 
                 </td>
+                <td className="py-3 px-6 text-center">{order?.cancelReason}</td>
               </tr>
             ))}
           </tbody>

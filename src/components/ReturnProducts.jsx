@@ -95,6 +95,9 @@ const ReturnProducts = () => {
                                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Username</th>
                                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Product</th>
                                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Order Date</th>
+            
+                                
+
                                 <th className="px-4 py-2 text-center text-sm font-semibold text-gray-600">Action</th>
                             </tr>
                         </thead>
@@ -102,7 +105,7 @@ const ReturnProducts = () => {
                             {returnedOrders.map((order) => (
                                 <tr key={order._id} className="border-t border-gray-200 hover:bg-gray-50">
                                     <td className="px-4 py-2 text-sm text-gray-700">{order._id}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-700">{order.userId.username}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-700">{order.userId?.username || "senin"}</td>
                                     <td className="px-4 py-2 text-sm text-gray-700">
                                         {order.products
                                             .filter((product) => product.isProductReturned)
@@ -114,12 +117,17 @@ const ReturnProducts = () => {
                                                         
                                                         price: ₹{product.discountedPrice * product.quantity}
                                                     </span>
+                                                    <p className="text-sm text-red-500">Reason: {product.returnReason || "No reason provided"}</p>
                                                 </div>
                                             ))}
                                     </td>
+                                   
                                     <td className="px-4 py-2 text-sm text-gray-700">
                                         {new Date(order.orderDate).toLocaleString()}
                                     </td>
+                                    
+                                    
+                                    
                                     <td className="px-4 py-2 text-center">
                                         {order.products.map((product) =>
                                             product.isProductReturned ? (
