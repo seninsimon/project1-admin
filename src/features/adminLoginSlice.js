@@ -1,12 +1,13 @@
 import { createAsyncThunk , createSlice } from "@reduxjs/toolkit";
-import axios from 'axios'
+
+import axiosClient from "../api/axiosClient";
 
 
 
 export const adminLoginThunk = createAsyncThunk("adminLogin/adminLoginThunk" , async (adminLoginData , {rejectWithValue})=>
 {
     try {
-        const response = await axios.post("http://localhost:3000/adminlogin" , adminLoginData)
+        const response = await axiosClient.post("/adminlogin" , adminLoginData)
         
         console.log("response from the server ", response);
 
