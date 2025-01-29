@@ -36,7 +36,15 @@ const ProductOffer = () => {
       return;
     }
 
+    if (offerType === "flat" && offerValue > 500) {
+      setError("Flat offer value cannot exceed 500.");
+      return;
+    }
 
+    if (offerType === "percentage" && offerValue > 50) {
+      setError("Percentage offer value cannot exceed 50%.");
+      return;
+    }
 
     try {
       const response = await axiosClient.post(`/productoffer/${id}`, {
@@ -46,15 +54,8 @@ const ProductOffer = () => {
         },
       });
 
-      
-      
-
       setSuccessMessage("Product offer updated successfully!");
-
-
-      
       navigate('/productofferdetails')
-
 
     } catch (err) {
       console.error("Error updating product offer:", err);

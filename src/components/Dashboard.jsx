@@ -85,32 +85,32 @@ const Dashboard = () => {
         fetchSalesReport();
     }, [filterType, startDate, endDate]);
 
-    const handleDownloadPDF = async () => {
-        try {
-            let params = { filterType };
-            if (filterType === 'custom' && startDate && endDate) {
-                params.startDate = startDate;
-                params.endDate = endDate;
+        const handleDownloadPDF = async () => {
+            try {
+                let params = { filterType };
+                if (filterType === 'custom' && startDate && endDate) {
+                    params.startDate = startDate;
+                    params.endDate = endDate;
+                }
+
+                const response = await axiosClient.get('/admin/download-sales-report-pdf', {
+                    params,
+                    responseType: 'blob'
+                });
+
+                const blob = new Blob([response.data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `sales-report-${new Date().toISOString().split('T')[0]}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error downloading PDF:', error);
             }
-
-            const response = await axiosClient.get('/admin/download-sales-report-pdf', {
-                params,
-                responseType: 'blob'
-            });
-
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `sales-report-${new Date().toISOString().split('T')[0]}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error downloading PDF:', error);
-        }
-    };
+        };
 
     const handleDownloadExcel = async () => {
         try {
